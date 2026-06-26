@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Алина Петрова — UX/UI Designer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">AP</a>
+    <ul class="nav-links">
+      <li><a href="#about">Обо мне</a></li>
+      <li><a href="#work">Работы</a></li>
+      <li><a href="#skills">Навыки</a></li>
+      <li><a href="#contact">Контакт</a></li>
+    </ul>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">
+      <span class="theme-icon">◑</span>
+    </button>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+    <div class="hero-content">
+      <p class="hero-tag">UX/UI Designer · Product Designer</p>
+      <h1 class="hero-title">
+        Создаю интерфейсы,<br />
+        <em>которые понимают</em><br />
+        людей
+      </h1>
+      <p class="hero-desc">
+        Превращаю сложные задачи в простые и красивые цифровые решения.
+        Каждый пиксель — это выбор. Каждый поток — это история.
+      </p>
+      <div class="hero-actions">
+        <a href="#work" class="btn btn-primary">Посмотреть работы</a>
+        <a href="#contact" class="btn btn-ghost">Написать мне</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Листайте вниз</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Marquee -->
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <span>UX Research</span><span class="sep">·</span>
+      <span>Wireframing</span><span class="sep">·</span>
+      <span>Prototyping</span><span class="sep">·</span>
+      <span>UI Design</span><span class="sep">·</span>
+      <span>Design Systems</span><span class="sep">·</span>
+      <span>User Testing</span><span class="sep">·</span>
+      <span>Figma</span><span class="sep">·</span>
+      <span>Motion Design</span><span class="sep">·</span>
+      <span>UX Research</span><span class="sep">·</span>
+      <span>Wireframing</span><span class="sep">·</span>
+      <span>Prototyping</span><span class="sep">·</span>
+      <span>UI Design</span><span class="sep">·</span>
+      <span>Design Systems</span><span class="sep">·</span>
+      <span>User Testing</span><span class="sep">·</span>
+      <span>Figma</span><span class="sep">·</span>
+      <span>Motion Design</span><span class="sep">·</span>
+    </div>
+  </div>
+
+  <!-- About -->
+  <section class="about section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-visual">
+          <div class="about-photo-frame">
+            <div class="about-photo-placeholder">
+              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="80" r="40" fill="currentColor" opacity="0.3"/>
+                <ellipse cx="100" cy="160" rx="60" ry="40" fill="currentColor" opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="about-badge">
+              <span class="badge-num">4+</span>
+              <span class="badge-txt">года опыта</span>
+            </div>
+          </div>
+          <div class="about-stats">
+            <div class="stat">
+              <span class="stat-num">32</span>
+              <span class="stat-label">Проекта</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">18</span>
+              <span class="stat-label">Клиента</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">4</span>
+              <span class="stat-label">Награды</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-text">
+          <p class="section-label">Обо мне</p>
+          <h2 class="section-title">Дизайнер, влюблённый<br />в человеческий опыт</h2>
+          <p class="about-bio">
+            Привет! Я Алина — UX/UI дизайнер из Москвы с опытом работы над
+            продуктами от стартапов до корпораций. Меня захватывает пространство
+            между тем, что хочет пользователь, и тем, что умеет технология.
+          </p>
+          <p class="about-bio">
+            Мой подход: сначала слушать, потом рисовать. Я верю, что лучший
+            дизайн — тот, который не замечаешь, потому что он просто работает.
+          </p>
+          <div class="about-tags">
+            <span class="tag">Empathy-driven</span>
+            <span class="tag">Systems thinking</span>
+            <span class="tag">Data-informed</span>
+            <span class="tag">Collaborative</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Work -->
+  <section class="work section" id="work">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-label">Избранные работы</p>
+        <h2 class="section-title">Проекты</h2>
+      </div>
+      <div class="work-grid">
+
+        <!-- Project 1 — featured -->
+        <article class="project-card project-featured" data-category="Mobile App">
+          <div class="project-visual" style="--accent: #7C3AED">
+            <div class="project-mockup mockup-1">
+              <div class="phone-frame">
+                <div class="phone-screen">
+                  <div class="screen-header"></div>
+                  <div class="screen-card"></div>
+                  <div class="screen-row"></div>
+                  <div class="screen-row short"></div>
+                  <div class="screen-grid">
+                    <div class="screen-item"></div>
+                    <div class="screen-item"></div>
+                    <div class="screen-item"></div>
+                    <div class="screen-item"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="project-info">
+            <span class="project-category">Mobile App</span>
+            <h3 class="project-title">Финтех приложение<br />для молодёжи</h3>
+            <p class="project-desc">
+              Полный редизайн мобильного банкинга: от исследования до запуска.
+              Результат — рост NPS на 34% за первые 3 месяца.
+            </p>
+            <div class="project-meta">
+              <span>UX Research</span>
+              <span>UI Design</span>
+              <span>Prototyping</span>
+            </div>
+            <a href="#" class="project-link" data-hover="Смотреть кейс">
+              <span>Смотреть кейс</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Project 2 -->
+        <article class="project-card" data-category="Web Platform">
+          <div class="project-visual" style="--accent: #0EA5E9">
+            <div class="project-mockup mockup-2">
+              <div class="browser-frame">
+                <div class="browser-bar">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="browser-screen">
+                  <div class="bs-nav"></div>
+                  <div class="bs-hero"></div>
+                  <div class="bs-cards">
+                    <div class="bs-card"></div>
+                    <div class="bs-card"></div>
+                    <div class="bs-card"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="project-info">
+            <span class="project-category">Web Platform</span>
+            <h3 class="project-title">SaaS Dashboard<br />для аналитики</h3>
+            <p class="project-desc">
+              Дизайн системы для обработки данных с упором на читаемость
+              и скорость принятия решений.
+            </p>
+            <div class="project-meta">
+              <span>Design System</span>
+              <span>Dashboard UI</span>
+            </div>
+            <a href="#" class="project-link">
+              <span>Смотреть кейс</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="project-card" data-category="Branding">
+          <div class="project-visual" style="--accent: #10B981">
+            <div class="project-mockup mockup-3">
+              <div class="brand-showcase">
+                <div class="brand-logo-big">Æ</div>
+                <div class="brand-colors">
+                  <div style="background: #10B981"></div>
+                  <div style="background: #065F46"></div>
+                  <div style="background: #D1FAE5"></div>
+                  <div style="background: #1F2937"></div>
+                </div>
+                <div class="brand-type">
+                  <div class="bt-line long"></div>
+                  <div class="bt-line medium"></div>
+                  <div class="bt-line short"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="project-info">
+            <span class="project-category">Branding</span>
+            <h3 class="project-title">Фирменный стиль<br />эко-стартапа</h3>
+            <p class="project-desc">
+              Визуальная идентичность от логотипа до гайдлайна для устойчивой
+              продуктовой компании.
+            </p>
+            <div class="project-meta">
+              <span>Brand Identity</span>
+              <span>UI Kit</span>
+            </div>
+            <a href="#" class="project-link">
+              <span>Смотреть кейс</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Project 4 -->
+        <article class="project-card" data-category="UX Research">
+          <div class="project-visual" style="--accent: #F59E0B">
+            <div class="project-mockup mockup-4">
+              <div class="research-viz">
+                <div class="rv-chart">
+                  <div class="rv-bar" style="height: 60%"></div>
+                  <div class="rv-bar" style="height: 85%"></div>
+                  <div class="rv-bar" style="height: 45%"></div>
+                  <div class="rv-bar" style="height: 70%"></div>
+                  <div class="rv-bar" style="height: 95%"></div>
+                </div>
+                <div class="rv-nodes">
+                  <div class="rv-node"></div>
+                  <div class="rv-node small"></div>
+                  <div class="rv-node"></div>
+                  <div class="rv-line"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="project-info">
+            <span class="project-category">UX Research</span>
+            <h3 class="project-title">Исследование E-commerce<br />воронки</h3>
+            <p class="project-desc">
+              Глубинные интервью + количественный анализ для снижения
+              отказов на этапе оформления заказа на 28%.
+            </p>
+            <div class="project-meta">
+              <span>User Interviews</span>
+              <span>Journey Map</span>
+            </div>
+            <a href="#" class="project-link">
+              <span>Смотреть кейс</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="skills section" id="skills">
+    <div class="container">
+      <div class="skills-grid">
+        <div class="skills-left">
+          <p class="section-label">Компетенции</p>
+          <h2 class="section-title">Чем я занимаюсь</h2>
+          <p class="skills-desc">
+            Работаю на стыке дизайна и психологии, превращая пользовательские
+            инсайты в продуманные интерфейсы.
+          </p>
+        </div>
+        <div class="skills-right">
+          <div class="skill-item">
+            <div class="skill-icon">
+              <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="2"/><path d="M14 20h12M20 14v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="skill-content">
+              <h3>UX Research</h3>
+              <p>Глубинные интервью, опросы, юзабилити-тестирование, анализ конкурентов, affinity mapping</p>
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-icon">
+              <svg viewBox="0 0 40 40" fill="none"><rect x="6" y="6" width="28" height="28" rx="4" stroke="currentColor" stroke-width="2"/><path d="M12 20h6M22 16h6M22 24h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="skill-content">
+              <h3>UI Design</h3>
+              <p>Figma, дизайн-системы, компонентная архитектура, адаптивный дизайн, тёмные/светлые темы</p>
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-icon">
+              <svg viewBox="0 0 40 40" fill="none"><path d="M8 32L20 8l12 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 24h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="skill-content">
+              <h3>Прототипирование</h3>
+              <p>Интерактивные прототипы высокой точности, микроанимации, пользовательские сценарии</p>
+            </div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-icon">
+              <svg viewBox="0 0 40 40" fill="none"><circle cx="14" cy="20" r="6" stroke="currentColor" stroke-width="2"/><circle cx="26" cy="20" r="6" stroke="currentColor" stroke-width="2"/></svg>
+            </div>
+            <div class="skill-content">
+              <h3>Дизайн-системы</h3>
+              <p>Атомарный дизайн, токены, документация компонентов, handoff разработчикам</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tools-section">
+        <p class="tools-label">Инструменты</p>
+        <div class="tools-list">
+          <div class="tool-item">
+            <span class="tool-name">Figma</span>
+            <div class="tool-bar"><div class="tool-fill" style="width: 98%"></div></div>
+          </div>
+          <div class="tool-item">
+            <span class="tool-name">Framer</span>
+            <div class="tool-bar"><div class="tool-fill" style="width: 80%"></div></div>
+          </div>
+          <div class="tool-item">
+            <span class="tool-name">Notion</span>
+            <div class="tool-bar"><div class="tool-fill" style="width: 90%"></div></div>
+          </div>
+          <div class="tool-item">
+            <span class="tool-name">Miro</span>
+            <div class="tool-bar"><div class="tool-fill" style="width: 85%"></div></div>
+          </div>
+          <div class="tool-item">
+            <span class="tool-name">Principle</span>
+            <div class="tool-bar"><div class="tool-fill" style="width: 75%"></div></div>
+          </div>
+          <div class="tool-item">
+            <span class="tool-name">After Effects</span>
+            <div class="tool-bar"><div class="tool-fill" style="width: 60%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact section" id="contact">
+    <div class="container">
+      <div class="contact-inner">
+        <div class="contact-blob"></div>
+        <p class="section-label">Контакт</p>
+        <h2 class="contact-title">Есть идея?<br /><em>Давайте создадим</em><br />что-то вместе</h2>
+        <p class="contact-sub">
+          Открыта к новым проектам, коллаборациям и интересным задачам.
+        </p>
+        <a href="mailto:alina@example.com" class="btn btn-primary btn-large">
+          Написать письмо
+        </a>
+        <div class="social-links">
+          <a href="#" class="social-link">Behance</a>
+          <span class="social-sep">·</span>
+          <a href="#" class="social-link">Dribbble</a>
+          <span class="social-sep">·</span>
+          <a href="#" class="social-link">LinkedIn</a>
+          <span class="social-sep">·</span>
+          <a href="#" class="social-link">Telegram</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <span class="footer-copy">© 2026 Алина Петрова</span>
+      <span class="footer-made">Designed with intention</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

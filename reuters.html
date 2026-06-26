@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Reuters Reader</title>
+  <link rel="stylesheet" href="reuters.css" />
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ── FEED VIEW ─────────────────────────────────────── -->
+  <div class="view active" id="view-feed">
+
+    <header class="top-bar">
+      <div class="top-bar-logo">
+        <svg width="100" height="22" viewBox="0 0 100 22" fill="none" aria-label="Reuters">
+          <text x="0" y="18" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif"
+                font-size="18" font-weight="700" fill="currentColor" letter-spacing="-0.5">REUTERS</text>
+        </svg>
+      </div>
+      <div class="top-bar-actions">
+        <button class="icon-btn" id="btn-search-toggle" aria-label="Поиск">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btn-theme" aria-label="Тема">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 20 20" fill="none" style="display:none">
+            <path d="M17 11.5A7.5 7.5 0 018.5 3a7.5 7.5 0 100 14A7.5 7.5 0 0117 11.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search bar (hidden by default) -->
+    <div class="search-bar" id="search-bar" hidden>
+      <div class="search-input-wrap">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <input type="search" id="search-input" placeholder="Поиск новостей..." autocomplete="off" />
+        <button class="search-clear" id="search-clear" hidden>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="category-scroll" role="tablist">
+      <button class="cat-btn active" data-cat="all" role="tab" aria-selected="true">Все</button>
+      <button class="cat-btn" data-cat="world" role="tab" aria-selected="false">Мир</button>
+      <button class="cat-btn" data-cat="business" role="tab" aria-selected="false">Бизнес</button>
+      <button class="cat-btn" data-cat="tech" role="tab" aria-selected="false">Технологии</button>
+      <button class="cat-btn" data-cat="science" role="tab" aria-selected="false">Наука</button>
+      <button class="cat-btn" data-cat="sport" role="tab" aria-selected="false">Спорт</button>
+    </div>
+
+    <div class="feed" id="feed" role="main"></div>
+
+    <div class="feed-empty hidden" id="feed-empty">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <circle cx="21" cy="21" r="13" stroke="currentColor" stroke-width="2"/>
+        <path d="M31 31l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15 21h12M21 15v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <p>Ничего не найдено</p>
+    </div>
+  </div>
+
+  <!-- ── ARTICLE VIEW ───────────────────────────────────── -->
+  <div class="view" id="view-article">
+
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <header class="article-nav">
+      <button class="back-btn" id="btn-back" aria-label="Назад">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="article-nav-meta" id="article-nav-meta"></div>
+      <div class="article-nav-actions">
+        <button class="icon-btn font-dec" id="btn-font-dec" aria-label="Уменьшить шрифт">A−</button>
+        <button class="icon-btn font-inc" id="btn-font-inc" aria-label="Увеличить шрифт">A+</button>
+        <button class="icon-btn" id="btn-save" aria-label="Сохранить">
+          <svg id="save-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 3h10a1 1 0 011 1v13l-6-3.5L4 17V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <article class="article-content" id="article-content"></article>
+
+  </div>
+
+  <!-- ── SAVED VIEW ─────────────────────────────────────── -->
+  <div class="view" id="view-saved">
+    <header class="top-bar">
+      <div class="top-bar-logo">Сохранённое</div>
+    </header>
+    <div class="feed" id="saved-feed"></div>
+    <div class="saved-empty hidden" id="saved-empty">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <path d="M12 6h24a2 2 0 012 2v34l-14-8-14 8V8a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <p>Нет сохранённых статей</p>
+      <span>Нажмите 🔖 в статье, чтобы сохранить</span>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM NAV ─────────────────────────────────────── -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" data-view="feed" aria-label="Лента">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="12" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="2" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="12" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+      </svg>
+      <span>Лента</span>
+    </button>
+    <button class="nav-item" data-view="saved" aria-label="Сохранённое">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M5 3h12a1 1 0 011 1v15l-7-4-7 4V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </svg>
+      <span>Сохранённое</span>
+    </button>
+  </nav>
+
+</div>
+
+<script src="reuters.js"></script>
+</body>
+</html>
