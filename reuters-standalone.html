@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Reuters Reader</title>
+  <style>
+/* ── Reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button { background: none; border: none; cursor: pointer; font: inherit; color: inherit; }
+input  { font: inherit; border: none; background: none; outline: none; }
+a      { text-decoration: none; color: inherit; }
+svg    { display: block; flex-shrink: 0; }
+
+/* ── Tokens ────────────────────────────────────────────── */
+:root {
+  --bg:       #F7F7F7;
+  --bg-card:  #FFFFFF;
+  --bg-input: #EBEBEB;
+  --text:     #111111;
+  --text-2:   #555555;
+  --text-3:   #999999;
+  --border:   #E3E3E3;
+  --accent:   #C8321A;
+
+  --cat-world:    #1D4ED8;
+  --cat-business: #0369A1;
+  --cat-tech:     #6D28D9;
+  --cat-science:  #047857;
+  --cat-sport:    #B45309;
+
+  --nav-h:    56px;
+  --header-h: 50px;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+  --article-size: 17px;
+}
+
+[data-theme="dark"] {
+  --bg:       #101010;
+  --bg-card:  #191919;
+  --bg-input: #252525;
+  --text:     #EFEFEF;
+  --text-2:   #999999;
+  --text-3:   #555555;
+  --border:   #2A2A2A;
+}
+
+/* ── Base ──────────────────────────────────────────────── */
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font);
+  background: #777;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+/* ── App Shell ─────────────────────────────────────────── */
+.app {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,0.35);
+}
+
+/* ── Views ─────────────────────────────────────────────── */
+.view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.view.active { display: flex; animation: viewIn .2s ease; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Top Bar ───────────────────────────────────────────── */
+.top-bar {
+  height: var(--header-h);
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.top-bar-logo {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.top-bar-actions { display: flex; gap: 2px; }
+
+/* ── Icon Buttons ──────────────────────────────────────── */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--text-2);
+  transition: background .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn:active { background: var(--bg-input); }
+
+.font-dec, .font-inc {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -.2px;
+  width: auto;
+  padding: 0 7px;
+}
+
+/* ── Search Bar ────────────────────────────────────────── */
+.search-bar {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 14px;
+  flex-shrink: 0;
+}
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: var(--text-3);
+}
+.search-input-wrap input { flex: 1; color: var(--text); font-size: 15px; }
+.search-input-wrap input::placeholder { color: var(--text-3); }
+.search-clear { color: var(--text-3); line-height: 0; }
+
+/* ── Category Strip ────────────────────────────────────── */
+.category-scroll {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.category-scroll::-webkit-scrollbar { display: none; }
+
+.cat-btn {
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-2);
+  background: var(--bg-input);
+  transition: background .12s, color .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-btn.active { background: var(--text); color: var(--bg-card); }
+
+/* ── Feed ──────────────────────────────────────────────── */
+.feed {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* ── Empty states ──────────────────────────────────────── */
+.feed-empty, .saved-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 32px;
+  color: var(--text-3);
+  text-align: center;
+}
+.feed-empty p, .saved-empty p { font-size: 15px; font-weight: 500; color: var(--text-2); }
+.saved-empty span { font-size: 13px; }
+.hidden { display: none !important; }
+
+/* ── Breaking Banner ───────────────────────────────────── */
+.breaking-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.breaking-banner:active { opacity: .8; }
+
+.breaking-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .2; }
+}
+
+/* ── Article Card ──────────────────────────────────────── */
+.article-card {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.article-card:active { background: var(--bg-input); }
+
+.article-card.featured {
+  padding: 18px 14px 16px;
+  border-bottom: 6px solid var(--border);
+}
+
+.card-category {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.cat-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cat-color-world    { color: var(--cat-world);    }
+.cat-color-business { color: var(--cat-business); }
+.cat-color-tech     { color: var(--cat-tech);     }
+.cat-color-science  { color: var(--cat-science);  }
+.cat-color-sport    { color: var(--cat-sport);    }
+.cat-color-all      { color: var(--accent);       }
+
+.dot-world    { background: var(--cat-world);    }
+.dot-business { background: var(--cat-business); }
+.dot-tech     { background: var(--cat-tech);     }
+.dot-science  { background: var(--cat-science);  }
+.dot-sport    { background: var(--cat-sport);    }
+.dot-all      { background: var(--accent);       }
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  letter-spacing: -.15px;
+}
+
+.featured .card-title {
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -.4px;
+}
+
+.card-lead {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured .card-lead {
+  -webkit-line-clamp: 3;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-3);
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.meta-sep { color: var(--border); }
+
+/* ── Section Label ─────────────────────────────────────── */
+.feed-section-label {
+  padding: 14px 14px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Progress Bar ──────────────────────────────────────── */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0%;
+  max-width: 430px;
+  height: 2px;
+  background: var(--accent);
+  z-index: 100;
+  transition: width .08s linear;
+}
+
+/* ── Article Nav ───────────────────────────────────────── */
+.article-nav {
+  height: var(--header-h);
+  padding: 0 10px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--text);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.back-btn:active { background: var(--bg-input); }
+
+.article-nav-meta {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.article-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+/* ── Article Content ───────────────────────────────────── */
+.article-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 80px;
+}
+
+/* ── Article Kicker ────────────────────────────────────── */
+.article-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.breaking-label {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Article Typography ────────────────────────────────── */
+.article-h1 {
+  padding: 10px 18px 0;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.18;
+  color: var(--text);
+  letter-spacing: -.6px;
+}
+
+.article-lead {
+  padding: 12px 18px 0;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+/* ── Byline (inline, text-only) ────────────────────────── */
+.article-byline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.byline-name {
+  font-weight: 600;
+  color: var(--text-2);
+}
+.byline-sep { color: var(--border); }
+.byline-meta { color: var(--text-3); }
+
+/* ── Article Body ──────────────────────────────────────── */
+.article-body-text {
+  padding: 20px 18px 0;
+  font-size: var(--article-size);
+  line-height: 1.72;
+  color: var(--text);
+}
+
+.article-body-text p {
+  color: var(--text);
+  margin-bottom: 1.15em;
+}
+.article-body-text p:last-child { margin-bottom: 0; }
+
+.article-body-text h2 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  letter-spacing: -.25px;
+  margin: 1.6em 0 .5em;
+}
+
+.article-body-text blockquote {
+  margin: 1.4em 0;
+  padding: 0 0 0 14px;
+  border-left: 3px solid var(--accent);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* ── Tags ──────────────────────────────────────────────── */
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 22px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+}
+
+.article-tag {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--bg-input);
+  color: var(--text-2);
+}
+
+/* ── Related ───────────────────────────────────────────── */
+.related-section {
+  border-top: 2px solid var(--text);
+  padding: 0 18px 24px;
+}
+
+.related-label {
+  padding: 14px 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.related-card {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.related-card:last-child { border-bottom: none; }
+.related-card:active .related-title { color: var(--accent); }
+
+.related-cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.related-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color .1s;
+}
+
+.related-time {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ── Bottom Nav ────────────────────────────────────────── */
+.bottom-nav {
+  display: flex;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  height: var(--nav-h);
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .12s;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item svg { transition: transform .12s; }
+.nav-item:active svg { transform: scale(.88); }
+
+/* ── Save state ────────────────────────────────────────── */
+.btn-save.saved #save-icon path { fill: var(--accent); stroke: var(--accent); }
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 440px) {
+  body { background: var(--bg); }
+  .app { box-shadow: none; }
+  .progress-bar { left: 0; transform: none; max-width: 100%; }
+}
+
+@media (min-width: 441px) {
+  body { background: #777; padding: 20px 0; }
+  [data-theme="dark"] body { background: #1a1a1a; }
+  .app { border-radius: 40px; min-height: calc(100vh - 40px); }
+}
+  </style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <div class="view active" id="view-feed">
+    <header class="top-bar">
+      <div class="top-bar-logo">REUTERS</div>
+      <div class="top-bar-actions">
+        <button class="icon-btn" id="btn-search-toggle" aria-label="Поиск">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btn-theme" aria-label="Тема">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 20 20" fill="none" style="display:none">
+            <path d="M17 11.5A7.5 7.5 0 018.5 3a7.5 7.5 0 100 14A7.5 7.5 0 0117 11.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="search-bar" id="search-bar" hidden>
+      <div class="search-input-wrap">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <input type="search" id="search-input" placeholder="Поиск новостей..." autocomplete="off" />
+        <button class="search-clear" id="search-clear" hidden>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="category-scroll" role="tablist">
+      <button class="cat-btn active" data-cat="all" role="tab" aria-selected="true">Все</button>
+      <button class="cat-btn" data-cat="world" role="tab" aria-selected="false">Мир</button>
+      <button class="cat-btn" data-cat="business" role="tab" aria-selected="false">Бизнес</button>
+      <button class="cat-btn" data-cat="tech" role="tab" aria-selected="false">Технологии</button>
+      <button class="cat-btn" data-cat="science" role="tab" aria-selected="false">Наука</button>
+      <button class="cat-btn" data-cat="sport" role="tab" aria-selected="false">Спорт</button>
+    </div>
+
+    <div class="feed" id="feed" role="main"></div>
+
+    <div class="feed-empty hidden" id="feed-empty">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <circle cx="21" cy="21" r="13" stroke="currentColor" stroke-width="2"/>
+        <path d="M31 31l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15 21h12M21 15v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <p>Ничего не найдено</p>
+    </div>
+  </div>
+
+  <div class="view" id="view-article">
+    <div class="progress-bar" id="progress-bar"></div>
+    <header class="article-nav">
+      <button class="back-btn" id="btn-back" aria-label="Назад">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="article-nav-meta" id="article-nav-meta"></div>
+      <div class="article-nav-actions">
+        <button class="icon-btn font-dec" id="btn-font-dec" aria-label="Уменьшить шрифт">A−</button>
+        <button class="icon-btn font-inc" id="btn-font-inc" aria-label="Увеличить шрифт">A+</button>
+        <button class="icon-btn" id="btn-save" aria-label="Сохранить">
+          <svg id="save-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 3h10a1 1 0 011 1v13l-6-3.5L4 17V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+    <article class="article-content" id="article-content"></article>
+  </div>
+
+  <div class="view" id="view-saved">
+    <header class="top-bar">
+      <div class="top-bar-logo">Сохранённое</div>
+    </header>
+    <div class="feed" id="saved-feed"></div>
+    <div class="saved-empty hidden" id="saved-empty">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+        <path d="M12 6h24a2 2 0 012 2v34l-14-8-14 8V8a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <p>Нет сохранённых статей</p>
+      <span>Нажмите закладку в статье, чтобы сохранить</span>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" data-view="feed" aria-label="Лента">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="2" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="12" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="2" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+        <rect x="12" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.7"/>
+      </svg>
+      <span>Лента</span>
+    </button>
+    <button class="nav-item" data-view="saved" aria-label="Сохранённое">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M5 3h12a1 1 0 011 1v15l-7-4-7 4V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </svg>
+      <span>Сохранённое</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+'use strict';
+
+/* ── Mock Data ─────────────────────────────────────────── */
+const ARTICLES = [
+  {
+    id: 1,
+    category: 'world',
+    categoryLabel: 'Мир',
+    isBreaking: true,
+    isFeatured: true,
+    title: 'G7 согласовала новый пакет санкций на фоне обострения конфликта на Ближнем Востоке',
+    lead: 'Лидеры семи ведущих экономик договорились об ужесточении торговых ограничений, затрагивающих энергетику, финансы и высокие технологии.',
+    author: 'Алексей Романов',
+    authorTitle: 'Reuters, Женева',
+    publishedAt: new Date(Date.now() - 14 * 60 * 1000),
+    readingTime: 5,
+    imageCaption: 'Встреча G7 в Женеве. Фотограф: Pool / Reuters',
+    tags: ['G7', 'Санкции', 'Ближний Восток', 'Дипломатия'],
+    body: [
+      { type: 'p', text: 'ЖЕНЕВА, 26 июня (Reuters) — Лидеры стран Большой семёрки по итогам двухдневного саммита в Женеве достигли соглашения о введении расширенного пакета санкций, направленных против государств, причастных к эскалации конфликта в ближневосточном регионе. Об этом сообщил официальный представитель Европейского совета.' },
+      { type: 'quote', text: 'Мы едины в своей позиции: любая попытка дестабилизировать международный порядок встретит скоординированный ответ G7.' },
+      { type: 'p', text: 'Согласно принятым решениям, под действие ограничительных мер подпадут более 200 физических и юридических лиц, а также будут введены секторальные санкции против нефтяной отрасли и ряда финансовых институтов. Параллельно страны-участницы подтвердили готовность выделить дополнительную гуманитарную помощь в размере $4,5 млрд.' },
+      { type: 'h2', text: 'Разногласия по срокам' },
+      { type: 'p', text: 'Источники в делегациях Германии и Франции сообщили Reuters, что переговоры затянулись из-за споров о поэтапности введения ограничений. Берлин настаивал на постепенном подходе с возможностью дипломатического выхода, тогда как США и Великобритания выступали за немедленные меры.' },
+      { type: 'p', text: 'В итоговом коммюнике отдельным пунктом выделена тема ядерной безопасности: страны G7 призвали к немедленному возобновлению инспекций МАГАТЭ и предупредили о «серьёзных последствиях» в случае нарушения режима нераспространения.' },
+      { type: 'h2', text: 'Реакция рынков' },
+      { type: 'p', text: 'Фьючерсы на нефть марки Brent в четверг утром подорожали на 2,3% на фоне новостей о возможном ограничении поставок. Европейские фондовые индексы открылись снижением: Stoxx 600 потерял 0,8%, немецкий DAX — 1,1%.' },
+      { type: 'p', text: 'Следующий раунд переговоров намечен на сентябрь в Риме. Итоговое коммюнике саммита будет опубликовано в полном объёме до конца дня.' },
+    ],
+    related: [3, 6, 9],
+  },
+  {
+    id: 2,
+    category: 'business',
+    categoryLabel: 'Бизнес',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'ФРС оставила ставку без изменений, сигнализировав о двух снижениях до конца года',
+    lead: 'Комитет по открытым рынкам сохранил базовую ставку на уровне 4,25–4,5% и обновил прогноз, допустив два снижения в 2026 году.',
+    author: 'Сьюзан Моррис',
+    authorTitle: 'Reuters, Вашингтон',
+    publishedAt: new Date(Date.now() - 2 * 3600 * 1000),
+    readingTime: 4,
+    imageCaption: 'Джером Пауэлл на пресс-конференции FOMC. Фотограф: Kevin Lamarque / Reuters',
+    tags: ['ФРС', 'Процентные ставки', 'Инфляция', 'Экономика США'],
+    body: [
+      { type: 'p', text: 'ВАШИНГТОН, 26 июня (Reuters) — Федеральная резервная система США по итогам июньского заседания оставила ключевую процентную ставку в диапазоне 4,25–4,5% годовых, сославшись на устойчивость рынка труда и постепенное, но всё ещё недостаточное снижение инфляции.' },
+      { type: 'p', text: 'Глава ФРС Джером Пауэлл на пресс-конференции заявил, что регулятор нуждается в дополнительных свидетельствах замедления ценового роста, прежде чем перейти к смягчению политики. Вместе с тем обновлённая точечная диаграмма показала, что большинство членов комитета ждут двух снижений ставки суммарно на 50 базисных пунктов до конца 2026 года.' },
+      { type: 'quote', text: 'Мы готовы действовать решительно в обоих направлениях — при необходимости ускорить смягчение или, напротив, задержаться на текущем уровне дольше.' },
+      { type: 'h2', text: 'Рынки приняли сигнал осторожно' },
+      { type: 'p', text: 'Индекс S&P 500 по итогам торговой сессии прибавил 0,4%, тогда как доходность 10-летних казначейских облигаций опустилась до 4,21%. Доллар ослаб к корзине основных валют на 0,3%. Трейдеры теперь закладывают первое снижение ставки в сентябре с вероятностью около 68%, согласно данным инструмента CME FedWatch.' },
+      { type: 'p', text: 'Следующее заседание FOMC запланировано на 29–30 июля. Июльские данные по инфляции (публикация 13 августа) станут ключевым ориентиром для оценки дальнейшей политики.' },
+    ],
+    related: [8, 10, 4],
+  },
+  {
+    id: 3,
+    category: 'tech',
+    categoryLabel: 'Технологии',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'OpenAI представила GPT-5: тест на рассуждение впервые превысил средний балл врача',
+    lead: 'Новая модель показывает результаты уровня эксперта в медицинских тестах и решает олимпиадные задачи по физике.',
+    author: 'Джессика Лим',
+    authorTitle: 'Reuters, Сан-Франциско',
+    publishedAt: new Date(Date.now() - 4 * 3600 * 1000),
+    readingTime: 5,
+    imageCaption: '',
+    tags: ['OpenAI', 'GPT-5', 'Искусственный интеллект', 'Большие модели'],
+    body: [
+      { type: 'p', text: 'САН-ФРАНЦИСКО, 26 июня (Reuters) — Компания OpenAI в четверг представила GPT-5 — языковую модель нового поколения, которая, по словам разработчиков, устанавливает новые ориентиры в способности к сложным рассуждениям, многошаговому планированию и интерпретации научных текстов.' },
+      { type: 'p', text: 'В ходе тестирования на наборе задач американского медицинского лицензионного экзамена USMLE модель набрала 92 балла из 100 — выше среднего результата практикующих врачей (87 баллов). На олимпиадных задачах по физике уровня IPhO GPT-5 решила 78% заданий без подсказок, тогда как предыдущая GPT-4o справлялась лишь с 48%.' },
+      { type: 'quote', text: 'Это не просто следующая версия — это качественный скачок в понимании структуры задачи.' },
+      { type: 'h2', text: 'Что изменилось под капотом' },
+      { type: 'p', text: 'OpenAI отказалась раскрывать детали архитектуры и объём обучающей выборки, однако упомянула о применении нового подхода к «масштабированию на этапе вывода»: модель самостоятельно решает, сколько шагов рассуждения выполнить до выдачи ответа, что позволяет тратить больше вычислений на по-настоящему сложные вопросы.' },
+      { type: 'p', text: 'Доступ к GPT-5 получат сначала подписчики ChatGPT Plus и корпоративные клиенты — с 1 июля. API для разработчиков откроется 15 июля. Стоимость для конечных пользователей остаётся на уровне $20 в месяц для базовой подписки; профессиональный тариф с расширенным лимитом запросов составит $200 в месяц.' },
+      { type: 'h2', text: 'Реакция конкурентов' },
+      { type: 'p', text: 'Представитель Google DeepMind заявил, что компания «внимательно изучит» опубликованные бенчмарки. Anthropic пообещала «в ближайшие недели» ответить на релиз обновлением собственных моделей. Акции Microsoft (крупнейшего инвестора OpenAI) на премаркете прибавили 3,2%.' },
+    ],
+    related: [7, 2, 5],
+  },
+  {
+    id: 4,
+    category: 'science',
+    categoryLabel: 'Наука',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'NASA подтвердило присутствие органических молекул в образцах с астероида Бенну',
+    lead: 'Анализ образцов, доставленных миссией OSIRIS-REx, выявил аминокислоты и нуклеобазы — строительный материал жизни.',
+    author: 'Карен Хьюз',
+    authorTitle: 'Reuters, Хьюстон',
+    publishedAt: new Date(Date.now() - 6 * 3600 * 1000),
+    readingTime: 4,
+    imageCaption: 'Образцы грунта с астероида Бенну. NASA / Reuters',
+    tags: ['NASA', 'Астероид Бенну', 'OSIRIS-REx', 'Астробиология'],
+    body: [
+      { type: 'p', text: 'ХЬЮСТОН, 26 июня (Reuters) — Учёные NASA объявили, что в образцах грунта с астероида Бенну, доставленных на Землю миссией OSIRIS-REx в 2023 году, обнаружены органические соединения, включая несколько аминокислот и нуклеобазы — соединения, входящие в состав ДНК и РНК.' },
+      { type: 'p', text: 'Находка не является прямым свидетельством внеземной жизни, однако подтверждает, что «строительный материал» биологических молекул широко распространён в Солнечной системе и мог попасть на раннюю Землю с метеоритами, внеся вклад в зарождение жизни.' },
+      { type: 'quote', text: 'Бенну — своего рода молекулярная капсула времени, сохранившая химию формирования Солнечной системы четыре с половиной миллиарда лет назад.' },
+      { type: 'h2', text: 'Детали анализа' },
+      { type: 'p', text: 'Команда из 68 исследователей по всему миру изучала 4,7 грамма реголита (пылеобразного грунта). Идентифицированы 33 аминокислоты, из которых 14 входят в стандартный набор, используемый живыми организмами на Земле. Концентрация углерода оказалась вдвое выше, чем в наиболее богатых углеродом метеоритах ранее.' },
+      { type: 'p', text: 'Исследование опубликовано в журнале Nature Astronomy. Следующим этапом станет зондирование астероида Апофис, запуск миссии OSIRIS-APEX к которому запланирован на 2029 год.' },
+    ],
+    related: [7, 3, 5],
+  },
+  {
+    id: 5,
+    category: 'sport',
+    categoryLabel: 'Спорт',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'Реал Мадрид выиграл клубный чемпионат мира, обыграв «Флуминенсе» 3:0 в финале',
+    lead: 'Мбаппе оформил дубль, Беллингем добавил третий. Испанский клуб стал первым трёхкратным победителем обновлённого турнира.',
+    author: 'Педро Гомес',
+    authorTitle: 'Reuters, Нью-Йорк',
+    publishedAt: new Date(Date.now() - 10 * 3600 * 1000),
+    readingTime: 3,
+    imageCaption: 'Килиан Мбаппе празднует гол в финале. Фотограф: Mike Segar / Reuters',
+    tags: ['Реал Мадрид', 'Клубный ЧМ', 'Мбаппе', 'Футбол'],
+    body: [
+      { type: 'p', text: 'НЬЮ-ЙОРК, 26 июня (Reuters) — «Реал Мадрид» выиграл клубный чемпионат мира 2026, в финале разгромив бразильский «Флуминенсе» со счётом 3:0 на стадионе MetLife в Нью-Йорке. Килиан Мбаппе записал в актив дубль (22-я и 58-я минуты), а Джуд Беллингем поставил точку на 74-й.' },
+      { type: 'p', text: 'Испанский клуб стал первым трёхкратным победителем обновлённого турнира ФИФА с расширенным форматом 32 команд, дебютировавшего в 2021 году. Для Мбаппе финал стал 14-м голом в турнире — новый рекорд. Мяч он сохранил на память.' },
+      { type: 'quote', text: 'Эта победа — для всех болельщиков по всему миру. «Реал» никогда не останавливается.' },
+      { type: 'p', text: 'Выручка ФИФА от турнира превысила $1 млрд — впервые для клубного соревнования. Следующий клубный чемпионат мира пройдёт в 2029 году в Японии.' },
+    ],
+    related: [1, 6, 8],
+  },
+  {
+    id: 6,
+    category: 'world',
+    categoryLabel: 'Мир',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'Саммит ООН по климату завершился соглашением о постепенном отказе от угля к 2035 году',
+    lead: '120 стран подписали итоговую декларацию. Индия и Китай присоединились с оговорками об увеличенных сроках.',
+    author: 'Нина Ван дер Берг',
+    authorTitle: 'Reuters, Найроби',
+    publishedAt: new Date(Date.now() - 18 * 3600 * 1000),
+    readingTime: 4,
+    imageCaption: 'Церемония подписания декларации в Найроби. Фотограф: Baz Ratner / Reuters',
+    tags: ['Климат', 'ООН', 'Уголь', 'Зелёная энергетика'],
+    body: [
+      { type: 'p', text: 'НАЙРОБИ, 25 июня (Reuters) — Участники климатического саммита ООН в Найроби согласовали декларацию, обязывающую подписантов поэтапно отказаться от выработки электроэнергии на угольных электростанциях до 2035 года для развитых стран и до 2040-го — для развивающихся.' },
+      { type: 'p', text: 'Итоговый документ подписали представители 120 государств. Китай и Индия — крупнейшие потребители угля — присоединились к декларации с оговоркой, позволяющей им перенести сроки ещё на пять лет при условии демонстрации прогресса в наращивании возобновляемых мощностей.' },
+      { type: 'quote', text: 'Мы знаем, что этого недостаточно. Но это самый амбициозный консенсус, которого нам удалось достичь.' },
+      { type: 'h2', text: 'Финансовый блок' },
+      { type: 'p', text: 'Отдельным пунктом согласовано создание Климатического фонда справедливого перехода объёмом $200 млрд. Средства предназначены для компенсации потерь угольных регионов и переобучения шахтёров. Первые выплаты намечены на 2027 год.' },
+    ],
+    related: [1, 4, 7],
+  },
+  {
+    id: 7,
+    category: 'tech',
+    categoryLabel: 'Технологии',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'Apple запускает iPhone 17 с первым собственным нейросетевым чипом A20 Bionic',
+    lead: 'Новый чип в 2,4 раза быстрее предшественника в задачах ИИ-инференса. Стартовая цена осталась на уровне $999.',
+    author: 'Мия Ямадa',
+    authorTitle: 'Reuters, Купертино',
+    publishedAt: new Date(Date.now() - 22 * 3600 * 1000),
+    readingTime: 3,
+    imageCaption: '',
+    tags: ['Apple', 'iPhone 17', 'A20 Bionic', 'Смартфоны'],
+    body: [
+      { type: 'p', text: 'КУПЕРТИНО, 25 июня (Reuters) — Apple в среду представила iPhone 17 на ежегодной конференции WWDC, анонсировав чип A20 Bionic с выделенным нейросетевым процессором, способным выполнять 45 триллионов операций в секунду — вдвое больше, чем у Android-конкурентов, по данным компании.' },
+      { type: 'p', text: 'Ключевые функции на базе чипа: локальная обработка всех запросов Apple Intelligence без отправки данных на сервер, генерация изображений в реальном времени и улучшенное распознавание голоса с разграничением говорящих.' },
+      { type: 'p', text: 'Продажи стартуют 19 сентября. Базовая модель iPhone 17 оценена в $999, Pro Max — в $1,299. По оценкам аналитиков Wedbush, за первые выходные может быть продано 18–20 млн устройств.' },
+    ],
+    related: [3, 2, 10],
+  },
+  {
+    id: 8,
+    category: 'business',
+    categoryLabel: 'Бизнес',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'Цены на нефть Brent достигли $94 на фоне сокращения добычи ОПЕК+ и роста спроса',
+    lead: 'Картель подтвердил снижение квот на 1,2 млн баррелей в сутки. Аналитики JPMorgan допускают $100 до конца лета.',
+    author: 'Родерик Мэтьюз',
+    authorTitle: 'Reuters, Лондон',
+    publishedAt: new Date(Date.now() - 26 * 3600 * 1000),
+    readingTime: 3,
+    imageCaption: 'Нефтяная платформа в Северном море. Фотограф: Toby Melville / Reuters',
+    tags: ['ОПЕК+', 'Нефть', 'Brent', 'Энергетика'],
+    body: [
+      { type: 'p', text: 'ЛОНДОН, 25 июня (Reuters) — Фьючерсы на нефть марки Brent в четверг достигли отметки $94,20 за баррель — максимума за последние восемь месяцев, — после того как ОПЕК+ подтвердил продление добровольного сокращения добычи на 1,2 млн баррелей в сутки до конца третьего квартала.' },
+      { type: 'p', text: 'Саудовская Аравия и Россия — ключевые игроки картеля — договорились о скоординированных мерах на фоне роста спроса из Азии: китайский импорт нефти в мае вырос на 12% год к году, достигнув рекордных 12,4 млн баррелей в день.' },
+      { type: 'quote', text: 'Рынок структурно дефицитен. До конца лета возможен тест уровня $100.' },
+      { type: 'p', text: 'Акции нефтяных мейджоров отреагировали ростом: ExxonMobil +2,1%, Shell +1,8%, TotalEnergies +1,6%. Авиакомпании, напротив, ушли в красную зону: United Airlines −3,4%, Lufthansa −2,9%.' },
+    ],
+    related: [2, 6, 1],
+  },
+  {
+    id: 9,
+    category: 'world',
+    categoryLabel: 'Мир',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'Переговоры по ядерному соглашению с Ираном возобновились в Вене после годового перерыва',
+    lead: 'Делегации США, ЕС и Ирана встретились в Австрии. Тегеран выдвинул три предварительных условия.',
+    author: 'Арафат Салех',
+    authorTitle: 'Reuters, Вена',
+    publishedAt: new Date(Date.now() - 30 * 3600 * 1000),
+    readingTime: 4,
+    imageCaption: '',
+    tags: ['Иран', 'Ядерная программа', 'СВПД', 'Дипломатия'],
+    body: [
+      { type: 'p', text: 'ВЕНА, 25 июня (Reuters) — После более чем годового перерыва в Вене стартовал новый раунд переговоров по возрождению «ядерной сделки» (СВПД). Участие принимают делегации США, Ирана и стран Евросоюза. Переговоры проходят на территории резиденции ООН под председательством европейского координатора.' },
+      { type: 'p', text: 'По сведениям источников Reuters в европейских дипломатических кругах, Тегеран выдвинул три предварительных условия: частичное снятие санкций на нефтяной экспорт, разморозку $10 млрд иранских активов в зарубежных банках и гарантии, что будущая администрация США не выйдет из соглашения в одностороннем порядке.' },
+      { type: 'quote', text: 'Мы не вернулись за стол переговоров, чтобы повторять ошибки прошлого. Нам нужны юридически обязывающие гарантии.' },
+      { type: 'p', text: 'Переговоры намечены как минимум на три дня. Следующее заседание пройдёт в пятницу.' },
+    ],
+    related: [1, 6, 2],
+  },
+  {
+    id: 10,
+    category: 'business',
+    categoryLabel: 'Бизнес',
+    isBreaking: false,
+    isFeatured: false,
+    title: 'Tesla сообщила о рекордных продажах электромобилей в Европе во втором квартале',
+    lead: 'Компания реализовала 198 000 автомобилей в регионе — рост 34% год к году. Model Y остаётся самым продаваемым электрокаром в мире.',
+    author: 'Кристоф Вебер',
+    authorTitle: 'Reuters, Берлин',
+    publishedAt: new Date(Date.now() - 36 * 3600 * 1000),
+    readingTime: 3,
+    imageCaption: '',
+    tags: ['Tesla', 'Электромобили', 'Европа', 'Илон Маск'],
+    body: [
+      { type: 'p', text: 'БЕРЛИН, 25 июня (Reuters) — Tesla отчиталась о рекордных европейских продажах во втором квартале 2026 года: 198 043 автомобиля против 147 800 в аналогичном периоде прошлого года, что соответствует росту на 33,7%. Ключевыми рынками роста стали Германия (+42%), Франция (+38%) и Норвегия (+18%).' },
+      { type: 'p', text: 'Успеху способствовали снижение цен на 6–8% по всей линейке в январе и запуск обновлённой Model Y с улучшенным запасом хода (630 км по WLTP). Берлинский гигафактори вышел на плановую мощность 500 000 автомобилей в год.' },
+      { type: 'quote', text: 'Европа — это уже не второй рынок. Это поле битвы за будущее автопрома.' },
+      { type: 'p', text: 'Конкуренты также фиксируют рост: BYD продал в Европе 47 000 автомобилей за квартал (+180%), Volkswagen ID.4 — 62 000 (+14%). Аналитики Goldman Sachs повысили целевую цену акций Tesla с $240 до $290.' },
+    ],
+    related: [2, 7, 8],
+  },
+];
+
+/* ── State ─────────────────────────────────────────────── */
+const state = {
+  currentView: 'feed',
+  currentArticleId: null,
+  currentCategory: 'all',
+  savedIds: new Set(JSON.parse(localStorage.getItem('rr_saved') || '[]')),
+  theme: localStorage.getItem('rr_theme') || 'light',
+  fontSize: parseInt(localStorage.getItem('rr_font') || '17', 10),
+  searchQuery: '',
+};
+
+/* ── Helpers ───────────────────────────────────────────── */
+function timeAgo(date) {
+  const diff = (Date.now() - date.getTime()) / 1000;
+  if (diff < 60) return 'только что';
+  if (diff < 3600) return `${Math.floor(diff / 60)} мин. назад`;
+  if (diff < 86400) {
+    const h = Math.floor(diff / 3600);
+    return `${h} ${h === 1 ? 'час' : h < 5 ? 'часа' : 'часов'} назад`;
+  }
+  const d = Math.floor(diff / 86400);
+  return `${d} ${d === 1 ? 'день' : d < 5 ? 'дня' : 'дней'} назад`;
+}
+
+function catColor(cat) {
+  const m = { world: 'cat-color-world', business: 'cat-color-business', tech: 'cat-color-tech', science: 'cat-color-science', sport: 'cat-color-sport' };
+  return m[cat] || 'cat-color-all';
+}
+
+function dotColor(cat) {
+  const m = { world: 'dot-world', business: 'dot-business', tech: 'dot-tech', science: 'dot-science', sport: 'dot-sport' };
+  return m[cat] || 'dot-all';
+}
+
+function saveSaved() {
+  localStorage.setItem('rr_saved', JSON.stringify([...state.savedIds]));
+}
+
+/* ── Render: Article Card ──────────────────────────────── */
+function renderCard(article, featured = false) {
+  const card = document.createElement('div');
+  card.className = 'article-card' + (featured ? ' featured' : '');
+  card.dataset.id = article.id;
+
+  const catHtml = `
+    <div class="card-category ${catColor(article.category)}">
+      <span class="cat-dot ${dotColor(article.category)}"></span>
+      ${article.categoryLabel}
+    </div>`;
+
+  card.innerHTML = `
+    ${catHtml}
+    <div class="card-title">${article.title}</div>
+    <div class="card-lead">${article.lead}</div>
+    <div class="card-meta">
+      <span>${article.author}</span>
+      <span class="meta-sep">·</span>
+      <span class="meta-time">${timeAgo(article.publishedAt)}</span>
+      <span class="meta-sep">·</span>
+      <span class="meta-read">${article.readingTime} мин.</span>
+    </div>`;
+
+  card.addEventListener('click', () => openArticle(article.id));
+  return card;
+}
+
+/* ── Render: Feed ──────────────────────────────────────── */
+function renderFeed() {
+  const feed = document.getElementById('feed');
+  const empty = document.getElementById('feed-empty');
+  feed.innerHTML = '';
+
+  let articles = ARTICLES;
+  if (state.currentCategory !== 'all') {
+    articles = articles.filter(a => a.category === state.currentCategory);
+  }
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    articles = articles.filter(a =>
+      a.title.toLowerCase().includes(q) ||
+      a.lead.toLowerCase().includes(q) ||
+      a.categoryLabel.toLowerCase().includes(q)
+    );
+  }
+
+  if (!articles.length) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  const breakingArticle = articles.find(a => a.isBreaking);
+
+  // Breaking banner
+  if (breakingArticle && !state.searchQuery && state.currentCategory === 'all') {
+    const banner = document.createElement('div');
+    banner.className = 'breaking-banner';
+    banner.innerHTML = `<span class="breaking-dot"></span><span>Срочно: ${breakingArticle.title.slice(0, 60)}…</span>`;
+    banner.addEventListener('click', () => openArticle(breakingArticle.id));
+    feed.appendChild(banner);
+  }
+
+  articles.forEach((article, i) => {
+    if (i === 0 && article.isFeatured && !state.searchQuery) {
+      feed.appendChild(renderCard(article, true));
+    } else {
+      if (i === 1 && !state.searchQuery) {
+        const lbl = document.createElement('div');
+        lbl.className = 'feed-section-label';
+        lbl.textContent = 'Последние новости';
+        feed.appendChild(lbl);
+      }
+      feed.appendChild(renderCard(article, false));
+    }
+  });
+}
+
+/* ── Render: Saved Feed ────────────────────────────────── */
+function renderSavedFeed() {
+  const feed = document.getElementById('saved-feed');
+  const empty = document.getElementById('saved-empty');
+  feed.innerHTML = '';
+
+  const saved = ARTICLES.filter(a => state.savedIds.has(a.id));
+  if (!saved.length) {
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  saved.forEach(a => feed.appendChild(renderCard(a, false)));
+}
+
+/* ── Render: Article ───────────────────────────────────── */
+function renderArticle(article) {
+  const content = document.getElementById('article-content');
+  const navMeta = document.getElementById('article-nav-meta');
+
+  navMeta.textContent = article.categoryLabel + ' · ' + timeAgo(article.publishedAt);
+
+  document.documentElement.style.setProperty('--article-size', state.fontSize + 'px');
+
+  let bodyHtml = '';
+  for (const block of article.body) {
+    if (block.type === 'p') {
+      bodyHtml += `<p>${block.text}</p>`;
+    } else if (block.type === 'h2') {
+      bodyHtml += `<h2>${block.text}</h2>`;
+    } else if (block.type === 'quote') {
+      bodyHtml += `<blockquote>${block.text}</blockquote>`;
+    }
+  }
+
+  const tagsHtml = article.tags.map(t => `<span class="article-tag">${t}</span>`).join('');
+
+  const relatedIds = article.related || [];
+  const relatedArticles = relatedIds.map(id => ARTICLES.find(a => a.id === id)).filter(Boolean);
+  const relatedHtml = relatedArticles.map(r => `
+    <div class="related-card" data-id="${r.id}">
+      <div class="related-cat ${catColor(r.category)}">${r.categoryLabel}</div>
+      <div class="related-title">${r.title}</div>
+      <div class="related-time">${timeAgo(r.publishedAt)}</div>
+    </div>`).join('');
+
+  content.innerHTML = `
+    <div class="article-kicker">
+      <span class="${catColor(article.category)}">
+        ${article.categoryLabel}
+      </span>
+      ${article.isBreaking ? `<span class="breaking-label"><span class="breaking-dot"></span>Срочно</span>` : ''}
+    </div>
+
+    <h1 class="article-h1">${article.title}</h1>
+    <p class="article-lead">${article.lead}</p>
+
+    <div class="article-byline">
+      <span class="byline-name">${article.author}</span>
+      <span class="byline-sep">·</span>
+      <span class="byline-meta">${article.authorTitle}</span>
+      <span class="byline-sep">·</span>
+      <span class="byline-meta">${timeAgo(article.publishedAt)}</span>
+      <span class="byline-sep">·</span>
+      <span class="byline-meta">${article.readingTime} мин.</span>
+    </div>
+
+    <div class="article-body-text">${bodyHtml}</div>
+
+    <div class="article-tags">${tagsHtml}</div>
+
+    ${relatedHtml ? `<div class="related-section"><div class="related-label">Читайте также</div>${relatedHtml}</div>` : ''}
+  `;
+
+  content.querySelectorAll('.related-card').forEach(card => {
+    const id = parseInt(card.dataset.id, 10);
+    card.addEventListener('click', () => openArticle(id));
+  });
+}
+
+/* ── Open Article ──────────────────────────────────────── */
+function openArticle(id) {
+  const article = ARTICLES.find(a => a.id === id);
+  if (!article) return;
+
+  state.currentArticleId = id;
+  renderArticle(article);
+  updateSaveBtn();
+
+  showView('article');
+
+  const articleContent = document.getElementById('article-content');
+  articleContent.scrollTop = 0;
+
+  document.getElementById('bottom-nav').style.display = 'none';
+}
+
+/* ── Progress Bar ──────────────────────────────────────── */
+function setupProgressBar() {
+  const bar = document.getElementById('progress-bar');
+  const content = document.getElementById('article-content');
+
+  function update() {
+    const { scrollTop, scrollHeight, clientHeight } = content;
+    const pct = scrollHeight <= clientHeight ? 100 : (scrollTop / (scrollHeight - clientHeight)) * 100;
+    bar.style.width = pct + '%';
+  }
+
+  content.addEventListener('scroll', update, { passive: true });
+}
+
+/* ── Save / Bookmark ───────────────────────────────────── */
+function updateSaveBtn() {
+  const btn = document.getElementById('btn-save');
+  if (!btn) return;
+  const saved = state.savedIds.has(state.currentArticleId);
+  btn.classList.toggle('saved', saved);
+  btn.setAttribute('aria-label', saved ? 'Убрать из сохранённого' : 'Сохранить');
+}
+
+function toggleSave() {
+  const id = state.currentArticleId;
+  if (!id) return;
+  if (state.savedIds.has(id)) {
+    state.savedIds.delete(id);
+  } else {
+    state.savedIds.add(id);
+  }
+  saveSaved();
+  updateSaveBtn();
+}
+
+/* ── View Switching ────────────────────────────────────── */
+function showView(name) {
+  state.currentView = name;
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('view-' + name);
+  if (target) target.classList.add('active');
+
+  const nav = document.getElementById('bottom-nav');
+  if (name === 'article') {
+    nav.style.display = 'none';
+  } else {
+    nav.style.display = '';
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.view === name);
+    });
+  }
+
+  if (name === 'saved') renderSavedFeed();
+}
+
+/* ── Category Filter ───────────────────────────────────── */
+function selectCategory(cat) {
+  state.currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.cat === cat);
+    btn.setAttribute('aria-selected', btn.dataset.cat === cat ? 'true' : 'false');
+  });
+  renderFeed();
+}
+
+/* ── Theme ─────────────────────────────────────────────── */
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme);
+  const sun = document.querySelector('.icon-sun');
+  const moon = document.querySelector('.icon-moon');
+  if (state.theme === 'dark') {
+    sun.style.display = 'none';
+    moon.style.display = 'block';
+  } else {
+    sun.style.display = 'block';
+    moon.style.display = 'none';
+  }
+}
+
+function toggleTheme() {
+  state.theme = state.theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('rr_theme', state.theme);
+  applyTheme();
+}
+
+/* ── Font Size ─────────────────────────────────────────── */
+function changeFontSize(delta) {
+  state.fontSize = Math.max(14, Math.min(21, state.fontSize + delta));
+  localStorage.setItem('rr_font', state.fontSize);
+  document.documentElement.style.setProperty('--article-size', state.fontSize + 'px');
+}
+
+/* ── Search ────────────────────────────────────────────── */
+function toggleSearch() {
+  const bar = document.getElementById('search-bar');
+  const input = document.getElementById('search-input');
+  const hidden = bar.hasAttribute('hidden');
+  if (hidden) {
+    bar.removeAttribute('hidden');
+    input.focus();
+  } else {
+    bar.setAttribute('hidden', '');
+    state.searchQuery = '';
+    input.value = '';
+    document.getElementById('search-clear').setAttribute('hidden', '');
+    renderFeed();
+  }
+}
+
+/* ── Init ──────────────────────────────────────────────── */
+function init() {
+  applyTheme();
+  renderFeed();
+  setupProgressBar();
+
+  // Category buttons
+  document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectCategory(btn.dataset.cat));
+  });
+
+  // Bottom nav
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => showView(item.dataset.view));
+  });
+
+  // Back button
+  document.getElementById('btn-back').addEventListener('click', () => {
+    showView('feed');
+    document.getElementById('progress-bar').style.width = '0%';
+  });
+
+  // Theme toggle
+  document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+
+  // Save toggle
+  document.getElementById('btn-save').addEventListener('click', toggleSave);
+
+  // Font size
+  document.getElementById('btn-font-dec').addEventListener('click', () => changeFontSize(-1));
+  document.getElementById('btn-font-inc').addEventListener('click', () => changeFontSize(1));
+
+  // Search toggle
+  document.getElementById('btn-search-toggle').addEventListener('click', toggleSearch);
+
+  // Search input
+  const searchInput = document.getElementById('search-input');
+  const searchClear = document.getElementById('search-clear');
+
+  searchInput.addEventListener('input', () => {
+    state.searchQuery = searchInput.value.trim();
+    searchClear.toggleAttribute('hidden', !state.searchQuery);
+    renderFeed();
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    state.searchQuery = '';
+    searchClear.setAttribute('hidden', '');
+    searchInput.focus();
+    renderFeed();
+  });
+
+  // Handle Android back gesture / history
+  window.addEventListener('popstate', () => {
+    if (state.currentView === 'article') {
+      showView('feed');
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
