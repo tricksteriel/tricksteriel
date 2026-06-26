@@ -287,39 +287,17 @@ function renderCard(article, featured = false) {
       ${article.categoryLabel}
     </div>`;
 
-  if (featured) {
-    card.innerHTML = `
-      <div class="card-img-placeholder cat-${article.category}" style="aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; letter-spacing:.08em; color:inherit; text-transform:uppercase;">
-        ${article.categoryLabel}
-      </div>
-      <div class="featured-body">
-        ${catHtml}
-        <div class="card-title">${article.title}</div>
-        <div class="card-lead">${article.lead}</div>
-        <div class="card-meta" style="margin-top:10px">
-          <span>${article.author}</span>
-          <span class="meta-sep">·</span>
-          <span class="meta-time">${timeAgo(article.publishedAt)}</span>
-          <span class="meta-sep">·</span>
-          <span class="meta-read">${article.readingTime} мин.</span>
-        </div>
-      </div>`;
-  } else {
-    card.innerHTML = `
-      <div class="card-top">
-        <div class="card-text">
-          ${catHtml}
-          <div class="card-title">${article.title}</div>
-          <div class="card-lead">${article.lead}</div>
-        </div>
-        <div class="card-thumb cat-${article.category}">${article.categoryLabel}</div>
-      </div>
-      <div class="card-meta">
-        <span class="meta-time">${timeAgo(article.publishedAt)}</span>
-        <span class="meta-sep">·</span>
-        <span class="meta-read">${article.readingTime} мин. чтения</span>
-      </div>`;
-  }
+  card.innerHTML = `
+    ${catHtml}
+    <div class="card-title">${article.title}</div>
+    <div class="card-lead">${article.lead}</div>
+    <div class="card-meta">
+      <span>${article.author}</span>
+      <span class="meta-sep">·</span>
+      <span class="meta-time">${timeAgo(article.publishedAt)}</span>
+      <span class="meta-sep">·</span>
+      <span class="meta-read">${article.readingTime} мин.</span>
+    </div>`;
 
   card.addEventListener('click', () => openArticle(article.id));
   return card;
@@ -417,46 +395,31 @@ function renderArticle(article) {
   const relatedArticles = relatedIds.map(id => ARTICLES.find(a => a.id === id)).filter(Boolean);
   const relatedHtml = relatedArticles.map(r => `
     <div class="related-card" data-id="${r.id}">
-      <div class="related-thumb cat-${r.category}">${r.categoryLabel}</div>
-      <div class="related-info">
-        <div class="related-cat ${catColor(r.category)}">${r.categoryLabel}</div>
-        <div class="related-title">${r.title}</div>
-        <div class="related-time">${timeAgo(r.publishedAt)}</div>
-      </div>
+      <div class="related-cat ${catColor(r.category)}">${r.categoryLabel}</div>
+      <div class="related-title">${r.title}</div>
+      <div class="related-time">${timeAgo(r.publishedAt)}</div>
     </div>`).join('');
-
-  const heroHtml = `
-    <div class="article-hero-placeholder cat-${article.category}" style="aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:var(--bg-input);">
-      <svg class="hero-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="4" y="4" width="40" height="40" rx="8"/>
-        <circle cx="16" cy="17" r="4"/>
-        <path d="M4 34l12-10 8 8 8-6 12 10"/>
-      </svg>
-      <span style="font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3);">${article.categoryLabel}</span>
-    </div>`;
 
   content.innerHTML = `
     <div class="article-kicker">
-      <span class="${catColor(article.category)}" style="display:flex;align-items:center;gap:5px">
-        <span class="cat-dot ${dotColor(article.category)}"></span>
+      <span class="${catColor(article.category)}">
         ${article.categoryLabel}
       </span>
-      ${article.isBreaking ? `<span class="breaking-label" style="display:flex;align-items:center;gap:5px"><span class="breaking-dot"></span>Срочно</span>` : ''}
+      ${article.isBreaking ? `<span class="breaking-label"><span class="breaking-dot"></span>Срочно</span>` : ''}
     </div>
 
     <h1 class="article-h1">${article.title}</h1>
     <p class="article-lead">${article.lead}</p>
 
     <div class="article-byline">
-      <div class="byline-avatar">${article.author.split(' ').map(w => w[0]).join('').slice(0,2)}</div>
-      <div class="byline-info">
-        <div class="byline-name">${article.author}</div>
-        <div class="byline-meta">${article.authorTitle} · ${timeAgo(article.publishedAt)} · ${article.readingTime} мин.</div>
-      </div>
+      <span class="byline-name">${article.author}</span>
+      <span class="byline-sep">·</span>
+      <span class="byline-meta">${article.authorTitle}</span>
+      <span class="byline-sep">·</span>
+      <span class="byline-meta">${timeAgo(article.publishedAt)}</span>
+      <span class="byline-sep">·</span>
+      <span class="byline-meta">${article.readingTime} мин.</span>
     </div>
-
-    ${heroHtml}
-    ${article.imageCaption ? `<p class="article-hero-caption">${article.imageCaption}</p>` : ''}
 
     <div class="article-body-text">${bodyHtml}</div>
 
